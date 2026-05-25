@@ -6,6 +6,39 @@
 
 #include <iostream>
 #include <vector>
+#include <chrono> //Time library
+
+//Physics Particle Class 
+class Particle {
+public:
+    float x, y, z;       // Position
+    float vx, vy, vz;    // Velocity
+    float ax, ay, az;    // Acceleration
+
+    // constructor
+    Particle(float startX, float startY, float startZ) 
+        : x(startX), y(startY), z(startZ), vx(0), vy(0), vz(0), ax(0), ay(0), az(0) {}
+
+    // update velocity
+    void UpdateVelocity(float time) {
+        vx += ax * time;
+        vy += ay * time;
+        vz += az * time;
+    }
+
+    // update position
+    void UpdatePosition(float time) {
+        x += vx * time;
+        y += vy * time;
+        z += vz * time;
+    }
+
+    // update both
+    void Update(float time) {
+        UpdateVelocity(time);
+        UpdatePosition(time);
+    }
+};
 
 // 3d model loading helper function
 bool LoadMy3DModel(std::string filePath, tinyobj::attrib_t& attrib, std::vector<tinyobj::shape_t>& shapes) {
@@ -55,21 +88,52 @@ int main() {
     // Orthographic camera setup
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    // (left, right, bottom, top, near, far)
+    //(left, right, bottom, top, near, far)
     glOrtho(-1.5, 1.5, -1.5, 1.5, -10.0, 10.0); 
     glMatrixMode(GL_MODELVIEW);
+
+    // create a new particle in main
+    Particle myParticle(0.0f, 0.0f, 0.0f); 
+    myParticle.vx = 2.0f; // Give it initial horizontal velocity
+
+    // Initialize the clock variables
+    using namespace std::chrono;
+    auto prev_time = high_resolution_clock::now();
 
     // Render Loop
     while (!glfwWindowShouldClose(window)) {
         
+        // Get the time in between frames inside the game loop
+        auto curr_time = high_resolution_clock::now();
+        duration<float> time_span = duration_cast<duration<float>>(curr_time - prev_time);
+        float deltaTime = time_span.count();
+        prev_time = curr_time;
+        
+        // Call particles update
+        myParticle.Update(deltaTime);
+
+        // Bouncing within the window bounds horizontally
+        if (myParticle.x >= 1.5f) 
+        {
+            myParticle.x = 1.5f;       
+            myParticle.vx *= -1.0f;    
+        } else if (myParticle.x <= -1.5f) 
+        {
+            myParticle.x = -1.5f;      
+            myParticle.vx *= -1.0f;    
+        }
+
         // Clear the screen
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glLoadIdentity();
 
+        // Update the position of 3D model aka the particle
+        glTranslatef(myParticle.x, myParticle.y, myParticle.z);
+
         // Scale the sphere 
         glScalef(0.6f, 0.6f, 0.6f);
 
-        // Render sphere at origin (center of the screen)
+        // Render sphere (coloring it red) 
         glColor3f(0.4f, 0.0f, 0.0f); // coloring it red 
         
         glBegin(GL_TRIANGLES);
@@ -86,7 +150,6 @@ int main() {
         }
         glEnd();
 
-        
         glfwSwapBuffers(window);
         glfwPollEvents();
     }

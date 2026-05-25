@@ -2,10 +2,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "MinGW GDB - Run Assignment",
+            "name": "Run Physics Engine",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/Assignment01-Danielle_Bravo.exe",
+            "program": "${workspaceFolder}/BaseProjectDemo-Bravo.exe",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

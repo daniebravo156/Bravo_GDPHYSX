@@ -15,7 +15,7 @@
                 "-lopengl32",
                 "-lgdi32",
                 "-o",
-                "${workspaceFolder}/Assignment01-Danielle_Bravo.exe"
+                "${workspaceFolder}/BaseProjectDemo-Bravo.exe"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
