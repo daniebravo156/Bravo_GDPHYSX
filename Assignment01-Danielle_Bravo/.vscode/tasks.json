@@ -8,8 +8,11 @@
             "args": [
                 "-g",
                 "${workspaceFolder}/src/main.cpp",
+                "${workspaceFolder}/src/Particle.cpp",
+                "${workspaceFolder}/src/ModelLoader.cpp",
                 "${workspaceFolder}/glad.c",
                 "-I${workspaceFolder}/include",
+                "-I${workspaceFolder}/src/headers",
                 "-L${workspaceFolder}/lib",
                 "-lglfw3",
                 "-lopengl32",

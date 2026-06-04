@@ -1,57 +1,12 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#define TINYOBJLOADER_IMPLEMENTATION
-#include "tiny_obj_loader.h"
+#include "headers/Particle.h"
+#include "headers/ModelLoader.h"
 
 #include <iostream>
 #include <vector>
 #include <chrono> //Time library
-
-//Physics Particle Class 
-class Particle {
-public:
-    float x, y, z;       // Position
-    float vx, vy, vz;    // Velocity
-    float ax, ay, az;    // Acceleration
-
-    // constructor
-    Particle(float startX, float startY, float startZ) 
-        : x(startX), y(startY), z(startZ), vx(0), vy(0), vz(0), ax(0), ay(0), az(0) {}
-
-    // update velocity
-    void UpdateVelocity(float time) {
-        vx += ax * time;
-        vy += ay * time;
-        vz += az * time;
-    }
-
-    // update position
-    void UpdatePosition(float time) {
-        x += vx * time;
-        y += vy * time;
-        z += vz * time;
-    }
-
-    // update both
-    void Update(float time) {
-        UpdateVelocity(time);
-        UpdatePosition(time);
-    }
-};
-
-// 3d model loading helper function
-bool LoadMy3DModel(std::string filePath, tinyobj::attrib_t& attrib, std::vector<tinyobj::shape_t>& shapes) {
-    std::vector<tinyobj::material_t> materials;
-    std::string warn, err;
-    
-    // make sure the path is correct and the file exists
-    bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, filePath.c_str());
-    if (!ret) {
-        std::cerr << "Failed to load asset " << filePath << ": " << err << std::endl;
-    }
-    return ret;
-}
 
 int main() {
     // Initialize GLFW
@@ -81,8 +36,11 @@ int main() {
     std::vector<tinyobj::shape_t> shapes;
     
     // Load the 3D model using our simplified helper function
-    if (!LoadMy3DModel("assets/sphere.obj", attrib, shapes)) {
-        return -1;
+    if (!LoadMy3DModel("src/assets/sphere.obj", attrib, shapes)) {
+        // Fallback check if assets is placed in the project base root directory instead
+        if (!LoadMy3DModel("assets/sphere.obj", attrib, shapes)) {
+            return -1;
+        }
     }
 
     // Orthographic camera setup
@@ -108,6 +66,9 @@ int main() {
         duration<float> time_span = duration_cast<duration<float>>(curr_time - prev_time);
         float deltaTime = time_span.count();
         prev_time = curr_time;
+        
+        // Cap excessive delta times (to maintain stability)
+        if (deltaTime > 0.1f) deltaTime = 0.1f;
         
         // Call particles update
         myParticle.Update(deltaTime);
